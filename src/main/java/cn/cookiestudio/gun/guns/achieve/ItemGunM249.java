@@ -7,9 +7,10 @@ import lombok.Getter;
 @Getter
 public class ItemGunM249 extends ItemGunBase {
 
-    public ItemGunM249() {
-        super(getGunData(ItemGunM249.class).getGunName());
+    public ItemGunM249(Integer meta, int count) {
+        super(getGunData(ItemGunM249.class).getGunId(), meta, count, getGunData(ItemGunM249.class).getGunName());
         gunData = getGunData(this.getClass());
+        this.setTextureName(gunData.getGunName());
         this.setCustomName(gunData.getGunName());
         if (!this.getNamedTag().contains("ammoCount")) {
             this.setAmmoCount(this.getGunData().getMagSize());
@@ -18,6 +19,13 @@ public class ItemGunM249 extends ItemGunBase {
         }
     }
 
+    public ItemGunM249(Integer meta) {
+        this(meta, 1);
+    }
+
+    public ItemGunM249() {
+        this(0);
+    }
 
     public void doInit() {
     }
@@ -39,9 +47,17 @@ public class ItemGunM249 extends ItemGunBase {
 
     public static class ItemMagM249 extends ItemMagBase {
 
-        public ItemMagM249() {
-            super(getGunData(ItemGunM249.class).getMagName());
+        public ItemMagM249(Integer meta, int count) {
+            super(getGunData(ItemGunM249.class).getMagId(), meta, count, getGunData(ItemGunM249.class).getMagName());
             this.setCustomName(getGunData(ItemGunM249.class).getMagName());
+        }
+
+        public ItemMagM249(Integer meta) {
+            this(meta, 1);
+        }
+
+        public ItemMagM249() {
+            this(0);
         }
 
         @Override

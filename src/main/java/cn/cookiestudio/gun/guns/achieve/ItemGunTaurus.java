@@ -7,9 +7,10 @@ import lombok.Getter;
 @Getter
 public class ItemGunTaurus extends ItemGunBase {
 
-    public ItemGunTaurus() {
-        super(getGunData(ItemGunTaurus.class).getGunName());
+    public ItemGunTaurus(Integer meta, int count) {
+        super(getGunData(ItemGunTaurus.class).getGunId(), meta, count, getGunData(ItemGunTaurus.class).getGunName());
         gunData = getGunData(this.getClass());
+        this.setTextureName(gunData.getGunName());
         this.setCustomName(gunData.getGunName());
         if (!this.getNamedTag().contains("ammoCount")) {
             this.setAmmoCount(this.getGunData().getMagSize());
@@ -18,6 +19,13 @@ public class ItemGunTaurus extends ItemGunBase {
         }
     }
 
+    public ItemGunTaurus(Integer meta) {
+        this(meta, 1);
+    }
+
+    public ItemGunTaurus() {
+        this(0);
+    }
 
     public void doInit() {
     }
@@ -39,9 +47,17 @@ public class ItemGunTaurus extends ItemGunBase {
 
     public static class ItemMagTaurus extends ItemMagBase {
 
-        public ItemMagTaurus() {
-            super(getGunData(ItemGunTaurus.class).getMagName());
+        public ItemMagTaurus(Integer meta, int count) {
+            super(getGunData(ItemGunTaurus.class).getMagId(), meta, count, getGunData(ItemGunTaurus.class).getMagName());
             this.setCustomName(getGunData(ItemGunTaurus.class).getMagName());
+        }
+
+        public ItemMagTaurus(Integer meta) {
+            this(meta, 1);
+        }
+
+        public ItemMagTaurus() {
+            this(0);
         }
 
         @Override

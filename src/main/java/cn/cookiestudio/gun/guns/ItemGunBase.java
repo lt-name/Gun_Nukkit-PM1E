@@ -3,19 +3,19 @@ package cn.cookiestudio.gun.guns;
 import cn.cookiestudio.gun.CoolDownTimer;
 import cn.cookiestudio.gun.GunPlugin;
 import cn.cookiestudio.gun.playersetting.PlayerSettingMap;
+import cn.cookiestudio.gun.utils.Utils;
+import cn.lanink.customitemapi.item.ItemCustomEdible;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.entity.item.EntityItem;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.EventPriority;
+import cn.nukkit.event.entity.EntityDamageByEntityEvent;
+import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.event.entity.ItemSpawnEvent;
-import cn.nukkit.event.player.PlayerAnimationEvent;
-import cn.nukkit.event.player.PlayerInteractEvent;
-import cn.nukkit.event.player.PlayerItemHeldEvent;
+import cn.nukkit.event.player.*;
 import cn.nukkit.item.Item;
-import cn.nukkit.item.customitem.CustomItemDefinition;
-import cn.nukkit.item.customitem.ItemCustomEdible;
-import cn.nukkit.item.customitem.data.ItemCreativeCategory;
+import cn.nukkit.level.Position;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.AnimatePacket;
@@ -23,7 +23,7 @@ import cn.nukkit.potion.Effect;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Map;
+import java.util.*;
 
 @Setter
 @Getter
@@ -34,7 +34,8 @@ public abstract class ItemGunBase extends ItemCustomEdible {
         Server.getInstance().getPluginManager().registerEvents(new Listener(), GunPlugin.getInstance());
         Server.getInstance().getScheduler().scheduleRepeatingTask(GunPlugin.getInstance(), () -> {
             Server.getInstance().getOnlinePlayers().values().forEach(player -> {
-                if (player.getInventory().getItemInHand() instanceof ItemGunBase itemGun) {
+                if (player.getInventory().getItemInHand() instanceof ItemGunBase) {
+                    ItemGunBase itemGun = (ItemGunBase) player.getInventory().getItemInHand();
                     if (player.isSneaking()) {
                         itemGun.getGunData().addAimingSlownessEffect(player);
                     } else {
@@ -71,8 +72,21 @@ public abstract class ItemGunBase extends ItemCustomEdible {
 
     protected GunData gunData;
 
-    public ItemGunBase(String name) {
-        super("gun:" + name, name, name);
+    public ItemGunBase(int id) {
+        super(id);
+    }
+
+    public ItemGunBase(int id, Integer meta) {
+        super(id, meta);
+    }
+
+    public ItemGunBase(int id, Integer meta, int count) {
+        super(id, meta, count);
+    }
+
+    public ItemGunBase(int id, Integer meta, int count, String textureName) {
+        super(id, meta, count);
+        this.setTextureName(textureName);
     }
 
     public static GunData getGunData(Class<? extends ItemGunBase> clazz) {
@@ -109,12 +123,12 @@ public abstract class ItemGunBase extends ItemCustomEdible {
     }
 
     @Override
-    public CustomItemDefinition getDefinition() {
-        return CustomItemDefinition
-                .edibleBuilder(this, ItemCreativeCategory.EQUIPMENT)
-                .creativeGroup("itemGroup.name.gun")
-                .allowOffHand(true)
-                .build();
+    public boolean allowOffHand() {
+        return true;
+    }
+
+    public String getCreativeGroup() {
+        return "itemGroup.name.gun";
     }
 
     public GunInteractAction interact(Player player) {
@@ -149,7 +163,7 @@ public abstract class ItemGunBase extends ItemCustomEdible {
                 coolDownTimer.interrupt(player);
             return false;
         }
-        if (!player.getInventory().contains(Item.fromString("gun:" + this.getGunData().getMagName()))) {
+        if (!player.getInventory().contains(Item.get(this.getGunData().getMagId()))) {
             this.getGunData().emptyGun(player);
             return false;
         }
@@ -161,7 +175,7 @@ public abstract class ItemGunBase extends ItemCustomEdible {
             for (Map.Entry<Integer, Item> entry : player.getInventory().getContents().entrySet()) {
                 Item item = entry.getValue();
                 int slot = entry.getKey();
-                if (item.equals(Item.fromString("gun:" + this.getGunData().getMagName()))) {//todo:debug
+                if (item.equals(Item.get(this.getGunData().getMagId()))) {//todo:debug
                     item.setCount(item.count - 1);
                     player.getInventory().setItem(slot, item);
                     break;
@@ -214,24 +228,21 @@ public abstract class ItemGunBase extends ItemCustomEdible {
         public void onItemSpawn(ItemSpawnEvent e) {
             Item item = e.getEntity().getItem();
             EntityItem drop = e.getEntity();
-            if (drop instanceof EntityCustomItem) {
-                return;
-            }
-            if (item instanceof ItemGunBase gun) {
-                EntityCustomItem customDrop = new EntityCustomItem(drop.getChunk(), drop.namedTag, gun.getSkinId(), gun.getDropItemScale());
-
-                drop.kill(); // 不知道为啥, 用close会NPE
-                customDrop.spawnToAll();
-            } else if (item instanceof ItemMagBase mag) {
-                EntityCustomItem customDrop = new EntityCustomItem(drop.getChunk(), drop.namedTag, mag.getSkinId(), mag.getDropItemScale());
+            if (item instanceof ItemGunBase) {
+                ItemGunBase itemGun = (ItemGunBase) item;
+                dropGun(itemGun, drop,0);
                 drop.kill();
-                customDrop.spawnToAll();
+            } else if (item instanceof ItemMagBase) {
+                ItemMagBase itemMag = (ItemMagBase) item;
+                dropMag(itemMag, drop,0);
+                drop.kill();
             }
         }
 
         @EventHandler
         public void onPlayerInteract(PlayerInteractEvent event) {
-            if (event.getPlayer().getInventory().getItemInHand() instanceof ItemGunBase itemGun && (event.getAction() == PlayerInteractEvent.Action.RIGHT_CLICK_AIR || event.getAction() == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK)) {
+            if (event.getPlayer().getInventory().getItemInHand() instanceof ItemGunBase && (event.getAction() == PlayerInteractEvent.Action.RIGHT_CLICK_AIR || event.getAction() == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK)) {
+                ItemGunBase itemGun = (ItemGunBase) event.getPlayer().getInventory().getItemInHand();
                 itemGun.interact(event.getPlayer());
             }
         }
@@ -242,6 +253,59 @@ public abstract class ItemGunBase extends ItemCustomEdible {
                 event.getPlayer().removeEffect(Effect.SLOWNESS);
         }
 
+        private void dropGun(ItemGunBase gun, Position pos, double offset){
+            EntityGun entityGun;
+            if (offset!=0){
+                Random random = new Random();
+                entityGun = new EntityGun(pos.getChunk(), EntityGun.getDefaultNBT(pos.add(Utils.rand(0, offset),0,Utils.rand(0, offset))), gun.getGunData(), gun);
+            }else{
+                entityGun = new EntityGun(pos.getChunk(), EntityGun.getDefaultNBT(pos), gun.getGunData(), gun);
+            }
+            entityGun.spawnToAll();
+        }
+
+        private void dropMag(ItemMagBase mag, Position pos,double offset){
+            EntityMag entityMag;
+            if (offset!=0){
+                Random random = new Random();
+                entityMag = new EntityMag(pos.getChunk(), EntityMag.getDefaultNBT(pos.add(Utils.rand(0, offset),0,Utils.rand(0, offset))), mag);
+            }else{
+                entityMag = new EntityMag(pos.getChunk(), EntityMag.getDefaultNBT(pos), mag);
+            }
+            entityMag.spawnToAll();
+        }
+
+        @EventHandler
+        public void onPlayerInteractEntityGunOrMag(EntityDamageByEntityEvent event) {
+            if (event.getEntity() instanceof EntityGun && event.getDamager() instanceof Player){
+                event.setCancelled();
+                EntityGun entityGun = (EntityGun) event.getEntity();
+                int empty = ((Player) event.getDamager()).getInventory().firstEmpty(null);
+                if (empty != -1){
+                    ((Player) event.getDamager()).getInventory().setItem(empty,entityGun.getItemGun());
+                }
+                event.getEntity().close();
+            }
+            if (event.getEntity() instanceof EntityMag && event.getDamager() instanceof Player){
+                event.setCancelled();
+                EntityMag entityMag = (EntityMag) event.getEntity();
+                ItemMagBase itemMag = entityMag.getItemMag();
+                int empty = ((Player) event.getDamager()).getInventory().firstEmpty(null);
+                if (empty != -1){
+                    ((Player) event.getDamager()).getInventory().setItem(empty,itemMag);
+                }
+                event.getEntity().close();
+            }
+        }
+
+        @EventHandler
+        public void onEntityGunOrMagHurt(EntityDamageEvent event){
+            if (event.getEntity() instanceof EntityGun || event.getEntity() instanceof EntityMag){
+                if (!(event instanceof EntityDamageByEntityEvent)) {
+                    event.setCancelled();
+                }
+            }
+        }
 
     }
 

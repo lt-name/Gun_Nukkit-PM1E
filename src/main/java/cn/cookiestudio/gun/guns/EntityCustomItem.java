@@ -1,3 +1,4 @@
+/*
 package cn.cookiestudio.gun.guns;
 
 import cn.nukkit.entity.custom.CustomEntity;
@@ -72,3 +73,4 @@ public class EntityCustomItem extends EntityItem implements CustomEntity {
         return addEntity;
     }
 }
+*/

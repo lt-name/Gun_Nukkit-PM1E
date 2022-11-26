@@ -40,9 +40,10 @@ public class FireTask extends PluginTask {
         firing.keySet().forEach(player -> {
             if (!firing.get(player))
                 return;
-            if (!(player.getInventory().getItemInHand() instanceof ItemGunBase itemGun)) {
+            if (!(player.getInventory().getItemInHand() instanceof ItemGunBase)) {
                 this.firing.put(player, false);
             } else {
+                ItemGunBase itemGun = (ItemGunBase) player.getInventory().getItemInHand();
                 ItemGunBase.GunInteractAction action = itemGun.interact(player);
                 if (action == ItemGunBase.GunInteractAction.RELOAD) {
                     this.firing.put(player, false);

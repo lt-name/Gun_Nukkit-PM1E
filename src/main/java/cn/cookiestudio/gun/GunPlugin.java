@@ -1,32 +1,37 @@
 package cn.cookiestudio.gun;
 
 import cn.cookiestudio.gun.command.GunCommand;
-import cn.cookiestudio.gun.guns.EntityCustomItem;
 import cn.cookiestudio.gun.guns.GunData;
 import cn.cookiestudio.gun.guns.ItemGunBase;
+import cn.cookiestudio.gun.guns.ItemMagBase;
 import cn.cookiestudio.gun.guns.achieve.*;
+import cn.cookiestudio.gun.network.AnimateEntityPacket;
+import cn.cookiestudio.gun.network.CameraShakePacket;
 import cn.cookiestudio.gun.playersetting.PlayerSettingPool;
+import cn.lanink.customitemapi.CustomItemAPI;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
-import cn.nukkit.entity.Entity;
-import cn.nukkit.entity.provider.CustomClassEntityProvider;
+import cn.nukkit.entity.data.Skin;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.server.DataPacketReceiveEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.network.protocol.EntityEventPacket;
+import cn.nukkit.network.protocol.ProtocolInfo;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.Config;
+import cn.nukkit.utils.Logger;
 import lombok.Getter;
 
+import javax.imageio.ImageIO;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Getter
 public class GunPlugin extends PluginBase {
@@ -37,9 +42,11 @@ public class GunPlugin extends PluginBase {
     private final Map<Class<? extends ItemGunBase>, GunData> gunDataMap = new HashMap<>();
     private final Map<String, Class<? extends ItemGunBase>> stringClassMap = new HashMap<>();
     private CoolDownTimer coolDownTimer;
-
     private PlayerSettingPool playerSettingPool;
     private FireTask fireTask;
+
+    private Skin crateSkin;
+    private Skin ammoBoxSkin;
 
     {
         stringClassMap.put("akm", ItemGunAkm.class);
@@ -72,8 +79,13 @@ public class GunPlugin extends PluginBase {
         fireTask = new FireTask(this);
         copyResource();
         config = new Config(getDataFolder() + "/config.yml");
+
+        this.initCrateSkin();
+        this.registerPacket();
+
         loadGunData();
-        registerEntity();
+        //TODO
+        //registerEntity();
         registerListener();
         registerCommand();
         coolDownTimer = new CoolDownTimer();
@@ -81,9 +93,9 @@ public class GunPlugin extends PluginBase {
         printSponsors();
     }
 
-    private void registerEntity() {
+    /*private void registerEntity() {
         Entity.registerCustomEntity(new CustomClassEntityProvider(EntityCustomItem.DEFINITION, EntityCustomItem.class));
-    }
+    }*/
 
     private void copyResource() {
         saveDefaultConfig();
@@ -100,10 +112,13 @@ public class GunPlugin extends PluginBase {
 
     private void loadGunData() {
         Map<String, Object> map = config.getAll();
-        map.entrySet().stream().forEach(e -> {
+        AtomicInteger id = new AtomicInteger(10000);
+        map.entrySet().forEach(e -> {
             Map<String, Object> value = (Map<String, Object>) e.getValue();
             GunData gunData = GunData
                     .builder()
+                    .gunId(id.get())
+                    .magId(1000 + id.get())
                     .gunName(e.getKey())
                     .magName((String) value.get("magName"))
                     .hitDamage((Double) value.get("hitDamage"))
@@ -121,20 +136,53 @@ public class GunPlugin extends PluginBase {
             gunDataMap.put(stringClassMap.get(e.getKey()), gunData);
             try {
                 ItemGunBase itemGun = stringClassMap.get(e.getKey()).newInstance();
-                Item.registerCustomItem(itemGun.getClass());
-                Item.registerCustomItem(itemGun.getItemMagObject().getClass());
-            } catch (InstantiationException | IllegalAccessException | NoSuchMethodException |
-                     InvocationTargetException exception) {
+                CustomItemAPI.getInstance().registerCustomItem(itemGun.getId(), itemGun.getClass());
+                Item.addCreativeItem(ProtocolInfo.v1_18_30, itemGun);
+                Item.addCreativeItem(ProtocolInfo.v1_19_0, itemGun);
+                Item.addCreativeItem(ProtocolInfo.v1_19_20, itemGun);
+
+                ItemMagBase itemMagObject = itemGun.getItemMagObject();
+                CustomItemAPI.getInstance().registerCustomItem(itemMagObject.getId(), itemMagObject.getClass());
+                Item.addCreativeItem(ProtocolInfo.v1_18_30, itemMagObject);
+                Item.addCreativeItem(ProtocolInfo.v1_19_0, itemMagObject);
+                Item.addCreativeItem(ProtocolInfo.v1_19_20, itemMagObject);
+            } catch (Exception exception) {
                 exception.printStackTrace();
             }
+            id.addAndGet(1);
         });
+    }
+
+    private void initCrateSkin(){
+        crateSkin = new Skin();
+        try {
+            crateSkin.setTrusted(true);
+            crateSkin.setGeometryData(new String(getBytes(GunPlugin.getInstance().getResource("resources/model/crate/skin.json"))));
+            crateSkin.setGeometryName("geometry.crate");
+            crateSkin.setSkinId("crate");
+            crateSkin.setSkinData(ImageIO.read(GunPlugin.getInstance().getResource("resources/model/crate/skin.png")));
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+
+        ammoBoxSkin = new Skin();
+        try {
+            ammoBoxSkin.setTrusted(true);
+            ammoBoxSkin.setGeometryData(new String(getBytes(GunPlugin.getInstance().getResource("resources/model/ammobox/skin.json"))));
+            ammoBoxSkin.setGeometryName("geometry.ammobox");
+            ammoBoxSkin.setSkinId("ammobox");
+            ammoBoxSkin.setSkinData(ImageIO.read(GunPlugin.getInstance().getResource("resources/model/ammobox/skin.png")));
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
     }
 
     private void registerListener() {
         Server.getInstance().getPluginManager().registerEvents(new Listener() {
             @EventHandler
             public void onDataPacketReceive(DataPacketReceiveEvent event) {
-                if (event.getPacket() instanceof EntityEventPacket packet) {
+                if (event.getPacket() instanceof EntityEventPacket) {
+                    EntityEventPacket packet = (EntityEventPacket) event.getPacket();
                     if (packet.event == EntityEventPacket.EATING_ITEM) {
                         Player player = event.getPlayer();
                         if (player.getInventory().getItemInHand() instanceof ItemGunBase) {
@@ -150,7 +198,12 @@ public class GunPlugin extends PluginBase {
         Server.getInstance().getCommandMap().register("", new GunCommand("gun"));
     }
 
-    public void saveGunData(GunData gunData) {
+    private void registerPacket() {
+        Server.getInstance().getNetwork().registerPacket(ProtocolInfo.ANIMATE_ENTITY_PACKET, AnimateEntityPacket.class);
+        Server.getInstance().getNetwork().registerPacket(ProtocolInfo.CAMERA_SHAKE_PACKET, CameraShakePacket.class);
+    }
+
+    public void saveGunData(GunData gunData){
         String gunName = gunData.getGunName();
         config.set(gunName + ".magSize", gunData.getMagSize());
         config.set(gunName + ".fireCoolDown", gunData.getFireCoolDown());
@@ -168,7 +221,7 @@ public class GunPlugin extends PluginBase {
     }
 
     private void printSponsors() {
-        var logger = this.getLogger();
+        Logger logger = this.getLogger();
         logger.warning("§a感谢以下付费用户的支持！(按照时间顺序)：");
         logger.info("§akaoya00");
         logger.info("§a米奇不妙屋");

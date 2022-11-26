@@ -1,7 +1,8 @@
 name: Gun
 main: cn.cookiestudio.gun.GunPlugin
-version: "2.0.3-PNX"
+version: "2.0.3-PM1E"
 authors: [daoge_cmd,lt-name,zimzaza4]
 api: ["1.0.13"]
 depend:
   - Easy4Form
+  - CustomItemAPI
