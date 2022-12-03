@@ -30,6 +30,7 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -214,9 +215,10 @@ public class GunData {
 
         @Override
         public void accept(Position pos, Player[] showPlayers) {
-            if (!(pos instanceof EntityHuman entityHuman)) {
+            if (!(pos instanceof EntityHuman)) {
                 return;
             }
+            EntityHuman entityHuman = (EntityHuman) pos;
             Location pos1;
             if (entityHuman.isSneaking()) {
                 pos1 = entityHuman.getLocation().add(0, -0.15, 0);

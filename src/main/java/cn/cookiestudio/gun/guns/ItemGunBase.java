@@ -303,9 +303,10 @@ public abstract class ItemGunBase extends ItemCustomEdible {
 
         @EventHandler
         public void onEntityInteract(EntityInteractEvent event) {
-            if (event.getEntity() instanceof EntityHuman human) {
-                if (human.getInventory().getItemInHand() instanceof ItemGunBase itemGun) {
-                    itemGun.interact(human);
+            if (event.getEntity() instanceof EntityHuman) {
+                EntityHuman human = (EntityHuman) event.getEntity();
+                if (human.getInventory().getItemInHand() instanceof ItemGunBase) {
+                    ((ItemGunBase) human.getInventory().getItemInHand()).interact(human);
                 }
             }
         }
