@@ -220,7 +220,7 @@ public abstract class ItemGunBase extends ItemCustomEdible {
                 coolDownTimer.interrupt(entityHuman);
             return false;
         }
-        if (!entityHuman.getInventory().contains(Item.fromString("gun:" + this.getGunData().getMagName()))) {
+        if (!entityHuman.getInventory().contains(Item.get(this.getGunData().getMagId()))) {
             this.getGunData().emptyGun(entityHuman);
             return false;
         }
@@ -232,7 +232,7 @@ public abstract class ItemGunBase extends ItemCustomEdible {
             for (Map.Entry<Integer, Item> entry : entityHuman.getInventory().getContents().entrySet()) {
                 Item item = entry.getValue();
                 int slot = entry.getKey();
-                if (item.equals(Item.fromString("gun:" + this.getGunData().getMagName()))) {//todo:debug
+                if (item.equals(Item.get(this.getGunData().getMagId()))) {//todo:debug
                     item.setCount(item.count - 1);
                     entityHuman.getInventory().setItem(slot, item);
                     break;
