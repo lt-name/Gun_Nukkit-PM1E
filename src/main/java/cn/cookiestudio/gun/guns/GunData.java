@@ -30,7 +30,6 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -135,9 +134,9 @@ public class GunData {
                 .getOnlinePlayers()
                 .values()
                 .stream()
+                .filter(p -> GunPlugin.getInstance().getPlayerSettingPool().getSettings().containsKey(p.getName()))
                 .filter(p -> GunPlugin.getInstance().getPlayerSettingPool().getSettings().get(p.getName()).isOpenTrajectoryParticle())
-                .collect(Collectors.toList())
-                .toArray(new Player[0]);
+                .toArray(Player[]::new);
         if (gunType instanceof ItemGunM3) {
             Location location = entityHuman.clone();
             for (int i = 1; i <= 10; i++) {

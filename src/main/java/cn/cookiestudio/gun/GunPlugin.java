@@ -86,8 +86,7 @@ public class GunPlugin extends PluginBase {
         this.registerPacket();
 
         loadGunData();
-        //TODO
-        //registerEntity();
+        registerEntity();
         registerListener();
         registerCommand();
         coolDownTimer = new CoolDownTimer();
