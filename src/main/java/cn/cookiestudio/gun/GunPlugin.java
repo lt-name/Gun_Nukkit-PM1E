@@ -1,6 +1,7 @@
 package cn.cookiestudio.gun;
 
 import cn.cookiestudio.gun.command.GunCommand;
+import cn.cookiestudio.gun.guns.EntityCustomItem;
 import cn.cookiestudio.gun.guns.GunData;
 import cn.cookiestudio.gun.guns.ItemGunBase;
 import cn.cookiestudio.gun.guns.ItemMagBase;
@@ -11,6 +12,7 @@ import cn.cookiestudio.gun.playersetting.PlayerSettingPool;
 import cn.lanink.customitemapi.CustomItemAPI;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
+import cn.nukkit.entity.custom.EntityManager;
 import cn.nukkit.entity.data.Skin;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.server.DataPacketReceiveEvent;
@@ -93,9 +95,9 @@ public class GunPlugin extends PluginBase {
         printSponsors();
     }
 
-    /*private void registerEntity() {
-        Entity.registerCustomEntity(new CustomClassEntityProvider(EntityCustomItem.DEFINITION, EntityCustomItem.class));
-    }*/
+    private void registerEntity() {
+        EntityManager.get().registerDefinition(EntityCustomItem.DEFINITION);
+    }
 
     private void copyResource() {
         saveDefaultConfig();
@@ -140,12 +142,14 @@ public class GunPlugin extends PluginBase {
                 Item.addCreativeItem(ProtocolInfo.v1_18_30, itemGun);
                 Item.addCreativeItem(ProtocolInfo.v1_19_0, itemGun);
                 Item.addCreativeItem(ProtocolInfo.v1_19_20, itemGun);
+                Item.addCreativeItem(ProtocolInfo.v1_19_50, itemGun);
 
                 ItemMagBase itemMagObject = itemGun.getItemMagObject();
                 CustomItemAPI.getInstance().registerCustomItem(itemMagObject.getId(), itemMagObject.getClass());
                 Item.addCreativeItem(ProtocolInfo.v1_18_30, itemMagObject);
                 Item.addCreativeItem(ProtocolInfo.v1_19_0, itemMagObject);
                 Item.addCreativeItem(ProtocolInfo.v1_19_20, itemMagObject);
+                Item.addCreativeItem(ProtocolInfo.v1_19_50, itemMagObject);
             } catch (Exception exception) {
                 exception.printStackTrace();
             }

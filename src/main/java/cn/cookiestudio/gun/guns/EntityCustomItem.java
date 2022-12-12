@@ -1,8 +1,7 @@
-/*
 package cn.cookiestudio.gun.guns;
 
 import cn.nukkit.entity.custom.CustomEntity;
-import cn.nukkit.entity.custom.CustomEntityDefinition;
+import cn.nukkit.entity.custom.EntityDefinition;
 import cn.nukkit.entity.data.IntEntityData;
 import cn.nukkit.entity.item.EntityItem;
 import cn.nukkit.level.format.FullChunk;
@@ -20,15 +19,20 @@ import static cn.nukkit.network.protocol.SetEntityLinkPacket.TYPE_PASSENGER;
 public class EntityCustomItem extends EntityItem implements CustomEntity {
 
     public final static int NETWORK_ID = 0;
-    public final static CustomEntityDefinition DEFINITION = CustomEntityDefinition.builder()
+    public final static EntityDefinition DEFINITION = EntityDefinition.builder()
             .identifier("pixelpoly:firearm_item")
             .spawnEgg(false)
-            .summonable(true)
+            .implementation(EntityCustomItem.class)
             .build();
 
     public EntityCustomItem(FullChunk chunk, CompoundTag nbt, int skinId, float scale) {
         super(chunk, nbt.putInt("skinId", skinId));
         this.setScale(scale);
+    }
+
+    @Override
+    public EntityDefinition getEntityDefinition() {
+        return DEFINITION;
     }
 
     @Override
@@ -43,16 +47,11 @@ public class EntityCustomItem extends EntityItem implements CustomEntity {
     }
 
     @Override
-    public CustomEntityDefinition getDefinition() {
-        return DEFINITION;
-    }
-
-    @Override
     public DataPacket createAddEntityPacket() {
         AddEntityPacket addEntity = new AddEntityPacket();
         addEntity.type = this.getNetworkId();
         addEntity.entityUniqueId = this.getId();
-        addEntity.id = this.getDefinition().getStringId();
+        addEntity.id = this.getIdentifier();
         addEntity.entityRuntimeId = this.getId();
         addEntity.yaw = (float) this.yaw;
         addEntity.headYaw = (float) this.yaw;
@@ -73,4 +72,3 @@ public class EntityCustomItem extends EntityItem implements CustomEntity {
         return addEntity;
     }
 }
-*/
