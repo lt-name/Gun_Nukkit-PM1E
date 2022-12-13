@@ -1,10 +1,13 @@
 package cn.cookiestudio.gun.guns;
 
+import cn.nukkit.entity.EntityLiving;
 import cn.nukkit.entity.custom.CustomEntity;
 import cn.nukkit.entity.custom.EntityDefinition;
 import cn.nukkit.entity.data.IntEntityData;
-import cn.nukkit.entity.item.EntityItem;
+import cn.nukkit.item.Item;
+import cn.nukkit.level.MovingObjectPosition;
 import cn.nukkit.level.format.FullChunk;
+import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.AddEntityPacket;
 import cn.nukkit.network.protocol.DataPacket;
@@ -16,7 +19,7 @@ import static cn.nukkit.network.protocol.SetEntityLinkPacket.TYPE_PASSENGER;
 
 @Getter
 @Setter
-public class EntityCustomItem extends EntityItem implements CustomEntity {
+public class EntityCustomItem extends EntityLiving implements CustomEntity {
 
     public final static int NETWORK_ID = 0;
     public final static EntityDefinition DEFINITION = EntityDefinition.builder()
@@ -25,9 +28,15 @@ public class EntityCustomItem extends EntityItem implements CustomEntity {
             .implementation(EntityCustomItem.class)
             .build();
 
-    public EntityCustomItem(FullChunk chunk, CompoundTag nbt, int skinId, float scale) {
+    public boolean hadCollision = false;
+
+    @Getter
+    private Item item;
+
+    public EntityCustomItem(FullChunk chunk, CompoundTag nbt, int skinId, float scale, Item item) {
         super(chunk, nbt.putInt("skinId", skinId));
         this.setScale(scale);
+        this.item = item;
     }
 
     @Override
@@ -70,5 +79,60 @@ public class EntityCustomItem extends EntityItem implements CustomEntity {
         }
 
         return addEntity;
+    }
+
+    @Override
+    public boolean onUpdate(int currentTick) {
+        if (this.closed) {
+            return false;
+        }
+
+        int tickDiff = currentTick - this.lastUpdate;
+        if (tickDiff <= 0 && !this.justCreated) {
+            return true;
+        }
+        this.lastUpdate = currentTick;
+
+        boolean hasUpdate = this.entityBaseTick(tickDiff);
+
+        if (this.isAlive()) {
+
+            MovingObjectPosition movingObjectPosition = null;
+
+            if (!this.isCollided) {
+                this.motionY -= this.getGravity();
+            }
+
+            Vector3 moveVector = new Vector3(this.x + this.motionX, this.y + this.motionY, this.z + this.motionZ);
+
+
+            double nearDistance = Integer.MAX_VALUE;
+
+            this.move(this.motionX, this.motionY, this.motionZ);
+
+            if (this.isCollided && !this.hadCollision) {
+                this.hadCollision = true;
+
+                this.motionX = 0;
+                this.motionY = 0;
+                this.motionZ = 0;
+
+                return false;
+            } else if (!this.isCollided && this.hadCollision) {
+                this.hadCollision = false;
+            }
+
+            if (!this.hadCollision || Math.abs(this.motionX) > 0.00001 || Math.abs(this.motionY) > 0.00001 || Math.abs(this.motionZ) > 0.00001) {
+                double f = Math.sqrt((this.motionX * this.motionX) + (this.motionZ * this.motionZ));
+                this.yaw = Math.atan2(this.motionX, this.motionZ) * 180 / Math.PI;
+                this.pitch = Math.atan2(this.motionY, f) * 180 / Math.PI;
+                hasUpdate = true;
+            }
+
+            this.updateMovement();
+
+        }
+
+        return hasUpdate;
     }
 }
