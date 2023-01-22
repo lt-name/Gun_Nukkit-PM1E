@@ -47,11 +47,17 @@ public class ItemGunAwp extends ItemGunBase {
 
     public static class ItemMagAwp extends ItemMagBase {
 
+        public ItemMagAwp(Integer meta, int count) {
+            super(getGunData(ItemGunAwp.class).getMagId(), meta, count, getGunData(ItemGunAwp.class).getMagName());
+            this.setCustomName(getGunData(ItemGunAwp.class).getMagName());
+        }
+
+        public ItemMagAwp(Integer meta) {
+            this(meta, 1);
+        }
+
         public ItemMagAwp() {
-            super(getGunData(ItemGunAwp.class).getGunId());
-            String magName = getGunData(ItemGunAwp.class).getMagName();
-            this.setTextureName(magName);
-            this.setCustomName(magName);
+            this(0);
         }
 
         @Override
