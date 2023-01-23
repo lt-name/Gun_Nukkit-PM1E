@@ -105,7 +105,7 @@ public class GunData {
                 .getOnlinePlayers()
                 .values()
                 .stream()
-                .filter(p -> GunPlugin.getInstance().getPlayerSettingPool().getSettings().get(p.getName()).isOpenTrajectoryParticle())
+                .filter(p -> GunPlugin.getInstance().getPlayerSettingPool().getPlayerSetting(p.getName()).isOpenTrajectoryParticle())
                 .toArray(Player[]::new);
         if (gunType instanceof ItemGunM3) {
             Location location = player.clone();
@@ -134,8 +134,7 @@ public class GunData {
                 .getOnlinePlayers()
                 .values()
                 .stream()
-                .filter(p -> GunPlugin.getInstance().getPlayerSettingPool().getSettings().containsKey(p.getName()))
-                .filter(p -> GunPlugin.getInstance().getPlayerSettingPool().getSettings().get(p.getName()).isOpenTrajectoryParticle())
+                .filter(p -> GunPlugin.getInstance().getPlayerSettingPool().getPlayerSetting(p.getName()).isOpenTrajectoryParticle())
                 .toArray(Player[]::new);
         if (gunType instanceof ItemGunM3) {
             Location location = entityHuman.clone();
@@ -273,7 +272,7 @@ public class GunData {
             map.put(particle, ammoParticleList);
             Position fireSmokePos = Position.fromObject(BVector3.fromLocation(pos1, 0.8).addToPos(pos1).add(0, 1.62, 0), pos1.level);
             if (entityHuman instanceof Player &&
-                    GunPlugin.getInstance().getPlayerSettingPool().getSettings().get(entityHuman.getName()).isOpenMuzzleParticle())
+                    GunPlugin.getInstance().getPlayerSettingPool().getPlayerSetting(entityHuman.getName()).isOpenMuzzleParticle())
                 Utils.sendParticle("minecraft:eyeofender_death_explode_particle", fireSmokePos, Server.getInstance().getOnlinePlayers().values().toArray(new Player[0]));
             for (Map.Entry<String, List<Position>> entry : map.entrySet()) {
                 String particleName = entry.getKey();
