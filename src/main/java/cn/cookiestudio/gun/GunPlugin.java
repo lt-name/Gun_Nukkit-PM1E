@@ -142,6 +142,7 @@ public class GunPlugin extends PluginBase {
                 Item.addCreativeItem(ProtocolInfo.v1_19_0, itemGun);
                 Item.addCreativeItem(ProtocolInfo.v1_19_20, itemGun);
                 Item.addCreativeItem(ProtocolInfo.v1_19_50, itemGun);
+                Item.addCreativeItem(ProtocolInfo.v1_19_60, itemGun);
 
                 ItemMagBase itemMagObject = itemGun.getItemMagObject();
                 CustomItemAPI.getInstance().registerCustomItem(itemMagObject.getId(), itemMagObject.getClass());
@@ -149,6 +150,7 @@ public class GunPlugin extends PluginBase {
                 Item.addCreativeItem(ProtocolInfo.v1_19_0, itemMagObject);
                 Item.addCreativeItem(ProtocolInfo.v1_19_20, itemMagObject);
                 Item.addCreativeItem(ProtocolInfo.v1_19_50, itemMagObject);
+                Item.addCreativeItem(ProtocolInfo.v1_19_60, itemMagObject);
             } catch (Exception exception) {
                 exception.printStackTrace();
             }
