@@ -139,28 +139,31 @@ public class GunPlugin extends PluginBase {
             try {
                 ItemGunBase itemGun = stringClassMap.get(e.getKey()).newInstance();
                 CustomItemAPI.getInstance().registerCustomItem(itemGun.getId(), itemGun.getClass());
-                Item.addCreativeItem(ProtocolInfo.v1_18_30, itemGun);
-                Item.addCreativeItem(ProtocolInfo.v1_19_0, itemGun);
-                Item.addCreativeItem(ProtocolInfo.v1_19_20, itemGun);
-                Item.addCreativeItem(ProtocolInfo.v1_19_50, itemGun);
-                Item.addCreativeItem(ProtocolInfo.v1_19_60, itemGun);
-                Item.addCreativeItem(ProtocolInfo.v1_19_70, itemGun);
-                Item.addCreativeItem(ProtocolInfo.v1_19_80, itemGun);
+                this.addCreativeItem(itemGun);
 
                 ItemMagBase itemMagObject = itemGun.getItemMagObject();
                 CustomItemAPI.getInstance().registerCustomItem(itemMagObject.getId(), itemMagObject.getClass());
-                Item.addCreativeItem(ProtocolInfo.v1_18_30, itemMagObject);
-                Item.addCreativeItem(ProtocolInfo.v1_19_0, itemMagObject);
-                Item.addCreativeItem(ProtocolInfo.v1_19_20, itemMagObject);
-                Item.addCreativeItem(ProtocolInfo.v1_19_50, itemMagObject);
-                Item.addCreativeItem(ProtocolInfo.v1_19_60, itemMagObject);
-                Item.addCreativeItem(ProtocolInfo.v1_19_70, itemMagObject);
-                Item.addCreativeItem(ProtocolInfo.v1_19_80, itemMagObject);
+                this.addCreativeItem(itemMagObject);
             } catch (Exception exception) {
                 exception.printStackTrace();
             }
             id.addAndGet(1);
         });
+    }
+
+    private void addCreativeItem(Item item) {
+        int[] protocols = new int[] {
+                ProtocolInfo.v1_18_30,
+                ProtocolInfo.v1_19_0,
+                ProtocolInfo.v1_19_20,
+                ProtocolInfo.v1_19_50,
+                ProtocolInfo.v1_19_60,
+                ProtocolInfo.v1_19_70,
+                ProtocolInfo.v1_19_80
+        };
+        for (int protocol : protocols) {
+            Item.addCreativeItem(protocol, item);
+        }
     }
 
     private void initCrateSkin(){
