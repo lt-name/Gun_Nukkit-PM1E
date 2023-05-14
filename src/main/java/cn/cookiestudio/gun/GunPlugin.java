@@ -44,6 +44,7 @@ public class GunPlugin extends PluginBase {
     private final Map<Class<? extends ItemGunBase>, GunData> gunDataMap = new HashMap<>();
     private final Map<String, Class<? extends ItemGunBase>> stringClassMap = new HashMap<>();
     private CoolDownTimer coolDownTimer;
+
     private PlayerSettingPool playerSettingPool;
     private FireTask fireTask;
 
@@ -143,6 +144,8 @@ public class GunPlugin extends PluginBase {
                 Item.addCreativeItem(ProtocolInfo.v1_19_20, itemGun);
                 Item.addCreativeItem(ProtocolInfo.v1_19_50, itemGun);
                 Item.addCreativeItem(ProtocolInfo.v1_19_60, itemGun);
+                Item.addCreativeItem(ProtocolInfo.v1_19_70, itemGun);
+                Item.addCreativeItem(ProtocolInfo.v1_19_80, itemGun);
 
                 ItemMagBase itemMagObject = itemGun.getItemMagObject();
                 CustomItemAPI.getInstance().registerCustomItem(itemMagObject.getId(), itemMagObject.getClass());
@@ -151,6 +154,8 @@ public class GunPlugin extends PluginBase {
                 Item.addCreativeItem(ProtocolInfo.v1_19_20, itemMagObject);
                 Item.addCreativeItem(ProtocolInfo.v1_19_50, itemMagObject);
                 Item.addCreativeItem(ProtocolInfo.v1_19_60, itemMagObject);
+                Item.addCreativeItem(ProtocolInfo.v1_19_70, itemMagObject);
+                Item.addCreativeItem(ProtocolInfo.v1_19_80, itemMagObject);
             } catch (Exception exception) {
                 exception.printStackTrace();
             }
