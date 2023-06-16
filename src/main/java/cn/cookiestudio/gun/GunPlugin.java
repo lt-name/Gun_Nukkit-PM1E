@@ -159,7 +159,8 @@ public class GunPlugin extends PluginBase {
                 ProtocolInfo.v1_19_50,
                 ProtocolInfo.v1_19_60,
                 ProtocolInfo.v1_19_70,
-                ProtocolInfo.v1_19_80
+                ProtocolInfo.v1_19_80,
+                ProtocolInfo.v1_20_0
         };
         for (int protocol : protocols) {
             Item.addCreativeItem(protocol, item);
